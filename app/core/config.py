@@ -6,7 +6,7 @@ from app.utils.ngrok_utils import get_SERVER_DOMAIN
 class Setting(BaseSettings):
     """Application settings"""
     
-    # Open AI configuration
+    # Devnagri configuration
     DEVNAGRI_API_KEY: str = os.getenv("DEVNAGRI_API_KEY", "")
     DEVNAGRI_WS_URL: str = os.getenv("DEVNAGRI_WS_URL")
     
