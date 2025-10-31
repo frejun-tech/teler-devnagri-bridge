@@ -71,7 +71,7 @@ class DevNagriClient:
             }
         }
         await self.devnagri_ws.send(json.dumps(start_event))
-        logger.info(f"Sent connected + start events to DevNagri (call_id={self.call_id}, stream_id={self.stream_id})")
+        logger.info(f"Sent connected and start events to DevNagri (call_id={self.call_id}, stream_id={self.stream_id})")
 
     # Teler -> DevNagri
     async def teler_to_devnagri(self):
@@ -82,7 +82,7 @@ class DevNagriClient:
                 message_type = data.get("type")
 
                 if message_type == "audio":
-                    audio_b64 = data.get("audio_b64")
+                    audio_b64 = data.get("data", {}).get("audio_b64")
                     
                     # MEDIA event Teler --> Devnagri
                     await self.devnagri_ws.send(json.dumps({
@@ -90,10 +90,10 @@ class DevNagriClient:
                         "stream_sid": self.stream_id,
                         "media": {"payload": audio_b64}
                     }))
-                    logger.debug(f"Sent audio chunk ({len(audio_b64)} bytes) to DevNagri with stream_sid={self.stream_id}")
+                    logger.debug(f"Sent audio chunk {len(audio_b64)}) to DevNagri with stream_sid={self.stream_id}")
 
                 else:
-                    logger.debug(f"Ignored Teler message type: {message_type}")
+                    logger.debug(f"Teler message type: {message_type}")
 
             except Exception as e:
                 logger.error(f"Error forwarding user audio to DevNagri: {e}")
@@ -110,15 +110,16 @@ class DevNagriClient:
 
                 # MEDIA event, Devnagri --> Teler
                 if event_type == "media":
-                    audio_b64 = data["media"]["payload"]
+                    audio_b64 = data.get("media", {}).get("payload")
                     if not audio_b64:
                         continue
+                    
+                    chunk = base64.b64decode(audio_b64)
+                    self.audio_buffer.append(chunk)
 
-                    self.audio_buffer.append(base64.b64decode(audio_b64))
-
-                    # Flush every 10 chunks
-                    if len(self.audio_buffer) >= 10:
+                    if len(self.audio_buffer) >= 60:
                         combined = b"".join(self.audio_buffer)
+                        self.audio_buffer.clear()
                         combined_b64 = base64.b64encode(combined).decode("utf-8")
                         
                         await self.websocket.send_json({
@@ -126,7 +127,9 @@ class DevNagriClient:
                             "audio_b64": combined_b64,
                             "chunk_id": chunk_id
                         })
-                        logger.debug(f"Sent buffered audio chunk #{chunk_id} ({len(combined_b64)} bytes) to Teler")
+                        logger.debug(f"Sent buffered audio chunk ({len(combined_b64)} bytes) to Teler")
+
+                        chunk_id += 1
 
                         # send MARK, Teler --> Devnagri
                         mark_event = {
@@ -135,19 +138,17 @@ class DevNagriClient:
                             "mark": {"name": "responsePart"}
                         }
                         await self.devnagri_ws.send(json.dumps(mark_event))
-                        logger.debug(f"Sent MARK event for chunk #{chunk_id} to DevNagri")
-
-                        self.audio_buffer = []
-                        chunk_id += 1
+                        logger.debug(f"Sent MARK event to DevNagri")
 
                 elif event_type == "clear": 
                     # Clear buffer immediately (barge-in), Devnagri --> Teler CLEAR event
-                    self.audio_buffer = []
+                    self.audio_buffer.clear()
                     await self.websocket.send_json({"type": "clear"})
-                    logger.info("Clear event received from DevNagri — buffer flushed")
+                    logger.debug("Clear event received from DevNagri — buffer flushed")
 
                 else:
-                    logger.warning(f"Unhandled DevNagri event: {event_type}")
+                    logger.warning(f"DevNagri event: {event_type}")
 
             except Exception as e:
                 logger.error(f"Error processing DevNagri message: {e}")
+

@@ -35,7 +35,7 @@ async def root():
         "message": "Teler Devnagri Bridge is running", 
         "status": "healthy",
         "SERVER_DOMAIN": settings.SERVER_DOMAIN,
-        "provider": "Devnagri" if settings.DEVNAGRI_API_KEY else "none"
+        "provider": "Devnagri" if settings.DEVNAGRI_WS_URL else "none"
     }
 
 @app.get("/health")

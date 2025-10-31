@@ -7,7 +7,6 @@ class Setting(BaseSettings):
     """Application settings"""
     
     # Devnagri configuration
-    DEVNAGRI_API_KEY: str = os.getenv("DEVNAGRI_API_KEY", "")
     DEVNAGRI_WS_URL: str = os.getenv("DEVNAGRI_WS_URL")
     
     #server configuration - dynamically get ngrok URL
@@ -19,7 +18,6 @@ class Setting(BaseSettings):
     server_port: int = int(os.getenv("SERVER_PORT", "8000"))
     
     # Teler configuration
-    TELER_ACCOUNT_ID: str = os.getenv("TELER_ACCOUNT_ID")
     TELER_API_KEY: str = os.getenv("TELER_API_KEY", "")
     
     # Logging

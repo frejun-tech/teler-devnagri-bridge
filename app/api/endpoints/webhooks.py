@@ -21,12 +21,23 @@ async def webhook_receiver(data: dict):
     if event_type == "call.initiated":
         call_data = data.get("data", {})
         call_id = call_data.get("call_id")
+        from_number_prefix = call_data.get("from", "")
+        to_number_prefix = call_data.get("to", "")
+        
+        from_number = from_number_prefix
+        to_number = to_number_prefix
+        
+        if from_number_prefix:
+            from_number = from_number_prefix.replace('+', '')
+            
+        if to_number_prefix:
+            to_number = to_number_prefix.replace('+', '')
         
         if call_id:
             call_data_store[call_id] = {
                 "call_id": call_id,
-                "from": call_data.get("from", "unknown_from"),
-                "to": call_data.get("to", "unknown_to"),
+                "from": from_number,
+                "to": to_number,
                 "account_id": data.get("account_id", ""),
                 "call_app_id": data.get("call_app_id", ""),
                 "stream_id": None 
@@ -44,7 +55,7 @@ async def webhook_receiver(data: dict):
         if call_id and call_id in call_data_store:
             if stream_id:
                 call_data_store[call_id]["stream_id"] = stream_id
-                logger.info(f"Updated call data with stream_id: {stream_id} for call_id: {call_id}")
+                logger.debug(f"Updated call data with stream_id: {stream_id} for call_id: {call_id}")
             else:
                 logger.warning(f"No stream_id found in stream.initiated webhook for call_id: {call_id}")
         else:
@@ -58,8 +69,6 @@ async def webhook_receiver(data: dict):
             del call_data_store[call_id]
             logger.info(f"Cleaned up call data for call_id: {call_id}")
     
-    else:
-        logger.info(f"Received unhandled webhook event: {event_type}")
     
     return JSONResponse(content="Webhook received.")
 

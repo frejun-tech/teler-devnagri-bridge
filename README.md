@@ -24,7 +24,7 @@ Ensure you have the following installed / available:
 - Docker & Docker Compose
 - Valid API credentials / access:
   - Teler account / API key / endpoints (frejun account)
-  - Devnagri API access
+  - Devnagri Agent
 
 ---
 
@@ -34,7 +34,7 @@ Ensure you have the following installed / available:
 
    ```bash
    git clone https://github.com/frejun-tech/teler-devnagri-bridge.git
-   cd teler-Devnagri-bridge
+   cd teler-devnagri-bridge
    cp .env.example .env
    # Edit .env with your actual values
    ```
@@ -46,12 +46,11 @@ Ensure you have the following installed / available:
 
 ## Environment Variables
 
-| Variable           | Description           | Default  |
-| ------------------ | --------------------- | -------- |
-| `DEVNAGRI_API_KEY` | Your Devnagri API key | Required |
-| `TELER_ACCOUNT_ID` | Teler Account Id      | Required |
-| `TELER_API_KEY`    | Your Teler API key    | Required |
-| `NGROK_AUTHTOKEN`  | Your ngrok auth token | Required |
+| Variable          | Description            | Default  |
+| ----------------- | ---------------------- | -------- |
+| `DEVNAGRI_WS_URL` | Devnagri WebSocket URL | Required |
+| `TELER_API_KEY`   | Teler API key          | Required |
+| `NGROK_AUTHTOKEN` | ngrok auth token       | Required |
 
 ## API Endpoints
 
