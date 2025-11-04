@@ -4,6 +4,7 @@ import base64
 import logging
 import websockets
 from fastapi import WebSocket
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -114,10 +115,10 @@ class DevNagriClient:
                     if not audio_b64:
                         continue
                     
-                    chunk = base64.b64decode(audio_b64)
+                    chunk = base64.b64decode(audio_b64, validate=True)
                     self.audio_buffer.append(chunk)
 
-                    if len(self.audio_buffer) >= 60:
+                    if len(self.audio_buffer) >= settings.BUFFER_SIZE:
                         combined = b"".join(self.audio_buffer)
                         self.audio_buffer.clear()
                         combined_b64 = base64.b64encode(combined).decode("utf-8")
