@@ -17,7 +17,7 @@ class DevNagriClient:
         self.to_number = to_number
         self.websocket = websocket  
         self.devnagri_ws = None
-        self.reconnect_delay = 5
+        self.reconnect_delay = 1
         self.audio_buffer = []  
 
     async def connect(self):

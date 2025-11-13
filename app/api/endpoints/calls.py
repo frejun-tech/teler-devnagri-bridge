@@ -93,16 +93,7 @@ async def media_stream(websocket: WebSocket, call_id: str = None):
         actual_call_id = uuid.UUID(teler_call_id).hex
         from_number = call_data.get("from") or "unknown_from"
         to_number = call_data.get("to") or "unknown_to"
-        
-        try:
-            if teler_stream_id:
-                actual_stream_id = uuid.UUID(teler_stream_id).hex
-            else:
-                raise ValueError("Missing stream_id")
-
-        except Exception as e:
-            actual_stream_id = uuid.uuid4().hex
-            logger.warning(f"No valid stream_id from webhook, generated: {actual_stream_id} ({e})")     
+        actual_stream_id = uuid.uuid4().hex   
                
         client = DevNagriClient(
             ws_url=settings.DEVNAGRI_WS_URL,
