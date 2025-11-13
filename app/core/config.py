@@ -8,7 +8,7 @@ class Setting(BaseSettings):
     
     # Devnagri configuration
     DEVNAGRI_WS_URL: str = os.getenv("DEVNAGRI_WS_URL")
-    BUFFER_SIZE: int = os.getenv("BUFFER_SIZE", 65)
+    BUFFER_SIZE: int = os.getenv("BUFFER_SIZE", 40)
     
     #server configuration - dynamically get ngrok URL
     @property
